@@ -8,6 +8,7 @@ internal class BuilderTest {
     @Test
     fun `it should verify that mandatory parameters are set`() {
         val testBuilder = TestBuilder()
+        testBuilder.mandatoryProperty = null
         assertThrows(PreconditionException::class.java) {
             testBuilder.build()
         }
@@ -16,7 +17,6 @@ internal class BuilderTest {
     @Test
     fun `it should build an instance of the class provided as type parameter`() {
         val testBuilder = TestBuilder()
-        testBuilder.mandatoryProperty = "foo"
         assertEquals(TestClass::class,testBuilder.build()::class)
     }
 }
@@ -26,6 +26,6 @@ class TestClass {
 
 class TestBuilder : Builder<TestClass> {
     @Mandatory
-    var mandatoryProperty: String? = null
+    var mandatoryProperty: String? = "foo"
     override fun buildInstance(): TestClass = TestClass()
 }
