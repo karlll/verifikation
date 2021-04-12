@@ -12,17 +12,15 @@ internal class BuilderTest {
         assertThrows(PreconditionException::class.java) {
             testBuilder.build()
         }
-
     }
     @Test
     fun `it should build an instance of the class provided as type parameter`() {
         val testBuilder = TestBuilder()
-        assertEquals(TestClass::class,testBuilder.build()::class)
+        assertEquals(TestClass::class, testBuilder.build()::class)
     }
 }
 
-class TestClass {
-}
+class TestClass
 
 class TestBuilder : Builder<TestClass> {
     @Mandatory

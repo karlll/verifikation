@@ -3,8 +3,8 @@ package com.ninjacontrol.verifikation
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
 
-@Target(allowedTargets = [AnnotationTarget.FIELD,AnnotationTarget.PROPERTY])
-annotation class Mandatory {}
+@Target(allowedTargets = [AnnotationTarget.FIELD, AnnotationTarget.PROPERTY])
+annotation class Mandatory
 
 interface Builder<T> {
 
@@ -18,10 +18,10 @@ interface Builder<T> {
         }
     }
 
-    fun build() : T {
+    fun build(): T {
         verifyMandatory(this)
         return buildInstance()
     }
 
-    fun buildInstance() : T
+    fun buildInstance(): T
 }
