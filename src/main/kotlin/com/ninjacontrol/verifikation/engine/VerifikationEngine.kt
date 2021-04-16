@@ -19,6 +19,8 @@ class VerifikationEngine : TestEngine {
         const val testScenarioAnnotationName = "com.ninjacontrol.verifikation.engine.TestScenario"
     }
 
+    val executor: Executor = ScenarioExecutor()
+
     override fun getId(): String = engineId
 
     override fun discover(
@@ -26,7 +28,6 @@ class VerifikationEngine : TestEngine {
         uniqueId: UniqueId?
     ): TestDescriptor {
         if (discoveryRequest != null && uniqueId != null) {
-            println(discoveryRequest)
             val packageSelector = discoveryRequest.getSelectorsByType(PackageSelector::class.java)
 
             val classGraphScan = ClassGraph().run {
@@ -39,11 +40,19 @@ class VerifikationEngine : TestEngine {
 
             val engineDescriptor = EngineDescriptor(uniqueId, "Verifikation")
 
-            val testClasses = classGraphScan.getClassesWithMethodAnnotation(testScenarioAnnotationName)
+            val testClasses =
+                classGraphScan.getClassesWithMethodAnnotation(testScenarioAnnotationName)
             testClasses.forEach { testClass ->
                 testClass.methodInfo.forEach { testMethod ->
                     if (testMethod.annotationInfo.containsName(testScenarioAnnotationName)) {
-                        engineDescriptor.addChild(VerifikationTestDescriptor(testClass, testMethod, UniqueId.forEngine(id), "${testMethod.className}#${testMethod.name}"))
+                        engineDescriptor.addChild(
+                            VerifikationTestDescriptor(
+                                testClass,
+                                testMethod,
+                                UniqueId.forEngine(id),
+                                "${testMethod.className}#${testMethod.name}"
+                            )
+                        )
                     }
                 }
             }
@@ -56,16 +65,23 @@ class VerifikationEngine : TestEngine {
 
     override fun execute(request: ExecutionRequest?) {
         request?.let { req ->
-            val rootTestDescriptor = req.rootTestDescriptor
-            req.engineExecutionListener.executionStarted(rootTestDescriptor)
-            println("Execution started: $req")
+            executor.execute(req)
         }
     }
+}
+
+interface Executor {
+    fun execute(request: ExecutionRequest)
 }
 
 @Target(allowedTargets = [AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION])
 annotation class TestScenario
 
-class VerifikationTestDescriptor(val classInfo: ClassInfo, val methodInfo: MethodInfo, engineId: UniqueId, displayName: String) : AbstractTestDescriptor(engineId.append("verifikation-test", displayName), displayName) {
+class VerifikationTestDescriptor(
+    val classInfo: ClassInfo,
+    val methodInfo: MethodInfo,
+    engineId: UniqueId,
+    displayName: String
+) : AbstractTestDescriptor(engineId.append("verifikation-test", displayName), displayName) {
     override fun getType(): TestDescriptor.Type = TestDescriptor.Type.TEST
 }
